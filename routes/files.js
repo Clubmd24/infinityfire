@@ -185,13 +185,16 @@ router.get('/download', auth, [
       return res.status(404).json({ error: 'File not found' });
     }
     
+    // Get file details for logging
+    const fileDetails = await s3Service.getFileDetails(path);
+    
     // Generate download URL
     const downloadUrl = await s3Service.generateDownloadUrl(path, parseInt(expires));
     
     // Log file download activity
     await logFileActivity(req.user.id, 'file_download', `User downloaded file: ${path}`, req, {
       filePath: path,
-      fileSize: fileDetails?.size,
+      fileSize: fileDetails.size,
       downloadUrl: downloadUrl,
       expiresIn: parseInt(expires)
     });
