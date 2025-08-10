@@ -12,9 +12,13 @@ const PORT = process.env.PORT || 5000;
 const authRoutes = require('./routes/auth');
 const fileRoutes = require('./routes/files');
 const userRoutes = require('./routes/users');
+const adminRoutes = require('./routes/admin');
 
 // Import database connection
 const { sequelize } = require('./config/database');
+
+// Import and setup associations
+require('./config/associations');
 
 // Security middleware
 app.use(helmet());
@@ -49,6 +53,7 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 app.use('/api/auth', authRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

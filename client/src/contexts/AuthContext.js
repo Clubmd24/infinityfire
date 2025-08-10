@@ -80,11 +80,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
-    setError(null);
+  const logout = async () => {
+    try {
+      // Call logout API to log the activity
+      await axios.post('/api/auth/logout');
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+    } finally {
+      // Always clear local state regardless of API call success
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      setUser(null);
+      setError(null);
+    }
   };
 
   const updateProfile = async (profileData) => {

@@ -27,6 +27,18 @@ const AdminPanel = () => {
   });
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [newUser, setNewUser] = useState({
+    username: '',
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    role: 'user',
+    isActive: true
+  });
+  const [activityLog, setActivityLog] = useState([]);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -43,7 +55,12 @@ const AdminPanel = () => {
       // Fetch bucket info
       const bucketResponse = await axios.get('/api/files/bucket-info');
       
+      // Fetch activity log
+      const activityResponse = await axios.get('/api/admin/activity-log');
+      const activityData = activityResponse.data.data;
+      
       setUsers(usersData);
+      setActivityLog(activityData);
       setStats({
         totalUsers: usersData.length,
         activeUsers: usersData.filter(u => u.isActive).length,
@@ -113,6 +130,31 @@ const AdminPanel = () => {
     setMessage({ type: '', text: '' });
   };
 
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      const response = await axios.post('/api/users', newUser);
+      
+      setMessage({ type: 'success', text: 'User created successfully' });
+      setShowAddUser(false);
+      setNewUser({ username: '', email: '', password: '', firstName: '', lastName: '', role: 'user', isActive: true });
+      
+      // Refresh data
+      fetchAdminData();
+    } catch (error) {
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to create user' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetNewUser = () => {
+    setNewUser({ username: '', email: '', password: '', firstName: '', lastName: '', role: 'user', isActive: true });
+    setShowPassword(false);
+  };
+
   const formatUptime = (timestamp) => {
     const now = Date.now();
     const diff = now - timestamp;
@@ -179,16 +221,26 @@ const AdminPanel = () => {
           >
             User Management
           </button>
-          <button
-            onClick={() => setActiveTab('system')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
-              activeTab === 'system'
-                ? 'bg-orange-500 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-dark-700'
-            }`}
-          >
-            System Status
-          </button>
+                  <button
+          onClick={() => setActiveTab('system')}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+            activeTab === 'system'
+              ? 'bg-orange-500 text-white'
+              : 'text-gray-400 hover:text-white hover:bg-dark-700'
+          }`}
+        >
+          System Status
+        </button>
+        <button
+          onClick={() => setActiveTab('activity')}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+            activeTab === 'activity'
+              ? 'bg-orange-500 text-white'
+              : 'text-gray-400 hover:text-white hover:bg-dark-700'
+          }`}
+        >
+          Activity Log
+        </button>
         </div>
       </div>
 
@@ -304,8 +356,137 @@ const AdminPanel = () => {
 
       {/* Users Tab */}
       {activeTab === 'users' && (
-        <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-white mb-6">User Management</h2>
+        <div className="space-y-6">
+          {/* Add User Section */}
+          <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-white">Add New User</h2>
+              <button
+                onClick={() => setShowAddUser(!showAddUser)}
+                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200"
+              >
+                {showAddUser ? 'Cancel' : 'Add User'}
+              </button>
+            </div>
+            
+            {showAddUser && (
+              <form onSubmit={handleAddUser} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                    <input
+                      type="text"
+                      value={newUser.username}
+                      onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                      className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
+                      placeholder="Enter username"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={newUser.email}
+                      onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                      className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
+                      placeholder="Enter email"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                    <input
+                      type="text"
+                      value={newUser.firstName}
+                      onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                      className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
+                      placeholder="Enter first name"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                    <input
+                      type="text"
+                      value={newUser.lastName}
+                      onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                      className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
+                      placeholder="Enter last name"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={newUser.password}
+                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                        className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 pr-10"
+                        placeholder="Enter password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
+                    <select
+                      value={newUser.role}
+                      onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                      className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-orange-500"
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={newUser.isActive}
+                      onChange={(e) => setNewUser({ ...newUser, isActive: e.target.checked })}
+                      className="w-4 h-4 text-orange-500 bg-dark-700 border-dark-600 rounded focus:ring-orange-500 focus:ring-2"
+                    />
+                    <span className="text-sm text-gray-300">Active Account</span>
+                  </label>
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Creating...' : 'Create User'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetNewUser}
+                    className="px-6 py-2 bg-dark-600 hover:bg-dark-500 text-gray-300 rounded-lg transition-all duration-200"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* User Management Table */}
+          <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-white mb-6">User Management</h2>
           
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -470,6 +651,137 @@ const AdminPanel = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Activity Log Tab */}
+      {activeTab === 'activity' && (
+        <div className="space-y-6">
+          {/* Activity Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">Total Activities</p>
+                  <p className="text-3xl font-bold text-white mt-2">
+                    {activityLog.length > 0 ? activityLog.length : '0'}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <Activity className="w-6 h-6 text-blue-400" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">Logins Today</p>
+                  <p className="text-3xl font-bold text-green-400 mt-2">
+                    {activityLog.filter(log => 
+                      log.activityType === 'login' && 
+                      new Date(log.createdAt).toDateString() === new Date().toDateString()
+                    ).length}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                  <UserCheck className="w-6 h-6 text-green-400" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">File Downloads</p>
+                  <p className="text-3xl font-bold text-purple-400 mt-2">
+                    {activityLog.filter(log => log.activityType === 'file_download').length}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                  <HardDrive className="w-6 h-6 text-purple-400" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">Active Users</p>
+                  <p className="text-3xl font-bold text-orange-400 mt-2">
+                    {new Set(activityLog.map(log => log.userId)).size}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-orange-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Activity Log Table */}
+          <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-white mb-6">Activity Log</h2>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-dark-600">
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">User</th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">Activity</th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">Description</th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">IP Address</th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activityLog.map((log) => (
+                    <tr key={log.id} className="border-b border-dark-600/50 hover:bg-dark-700/50">
+                      <td className="py-3 px-4">
+                        <div>
+                          <p className="text-white font-medium">
+                            {log.user?.username || 'Unknown User'}
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            {log.user?.email || 'No email'}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          log.activityType === 'login' 
+                            ? 'bg-green-500/20 text-green-400'
+                            : log.activityType === 'logout'
+                            ? 'bg-red-500/20 text-red-400'
+                            : log.activityType === 'file_download'
+                            ? 'bg-blue-500/20 text-blue-400'
+                            : 'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {log.activityType.replace('_', ' ').toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-gray-300 max-w-xs truncate">
+                        {log.description}
+                      </td>
+                      <td className="py-3 px-4 text-gray-300 text-sm">
+                        {log.ipAddress || 'N/A'}
+                      </td>
+                      <td className="py-3 px-4 text-gray-300 text-sm">
+                        {new Date(log.createdAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              {activityLog.length === 0 && (
+                <div className="text-center py-8">
+                  <Activity className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400">No activity logs found</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

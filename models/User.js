@@ -79,4 +79,20 @@ User.prototype.toJSON = function() {
   return values;
 };
 
+// Static method to get user with activity logs
+User.getUserWithActivity = async function(userId, limit = 50) {
+  const ActivityLog = require('./ActivityLog');
+  return await this.findByPk(userId, {
+    attributes: { exclude: ['password'] },
+    include: [
+      {
+        model: ActivityLog,
+        as: 'activityLogs',
+        limit: limit,
+        order: [['createdAt', 'DESC']]
+      }
+    ]
+  });
+};
+
 module.exports = User; 

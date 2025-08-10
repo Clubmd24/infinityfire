@@ -2,6 +2,28 @@ const express = require('express');
 const { query, validationResult } = require('express-validator');
 const { auth } = require('../middleware/auth');
 const s3Service = require('../services/s3Service');
+const ActivityLog = require('../models/ActivityLog');
+
+// Helper function to log file activity
+const logFileActivity = async (userId, activityType, description, req, metadata = {}) => {
+  try {
+    await ActivityLog.create({
+      userId,
+      activityType,
+      description,
+      ipAddress: req.ip || req.connection.remoteAddress,
+      userAgent: req.get('User-Agent'),
+      metadata: {
+        ...metadata,
+        timestamp: new Date().toISOString(),
+        endpoint: req.originalUrl,
+        method: req.method
+      }
+    });
+  } catch (error) {
+    console.error('Failed to log file activity:', error);
+  }
+};
 
 const router = express.Router();
 
@@ -90,6 +112,14 @@ router.get('/download', auth, [
     
     // Generate download URL
     const downloadUrl = await s3Service.generateDownloadUrl(path, parseInt(expires));
+    
+    // Log file download activity
+    await logFileActivity(req.user.id, 'file_download', `User downloaded file: ${path}`, req, {
+      filePath: path,
+      fileSize: fileDetails?.size,
+      downloadUrl: downloadUrl,
+      expiresIn: parseInt(expires)
+    });
     
     res.json({
       success: true,

@@ -2,7 +2,28 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const ActivityLog = require('../models/ActivityLog');
 const { auth } = require('../middleware/auth');
+
+// Helper function to log activity
+const logActivity = async (userId, activityType, description, req) => {
+  try {
+    await ActivityLog.create({
+      userId,
+      activityType,
+      description,
+      ipAddress: req.ip || req.connection.remoteAddress,
+      userAgent: req.get('User-Agent'),
+      metadata: {
+        timestamp: new Date().toISOString(),
+        endpoint: req.originalUrl,
+        method: req.method
+      }
+    });
+  } catch (error) {
+    console.error('Failed to log activity:', error);
+  }
+};
 
 const router = express.Router();
 
@@ -123,6 +144,9 @@ router.post('/login', [
     // Update last login
     await user.update({ lastLogin: new Date() });
 
+    // Log login activity
+    await logActivity(user.id, 'login', `User ${user.username} logged in successfully`, req);
+
     // Generate token
     const token = generateToken(user.id);
 
@@ -187,6 +211,21 @@ router.put('/profile', auth, [
   } catch (error) {
     console.error('Profile update error:', error);
     res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// Logout
+router.post('/logout', auth, async (req, res) => {
+  try {
+    // Log logout activity
+    await logActivity(req.user.id, 'logout', `User ${req.user.username} logged out`, req);
+
+    res.json({
+      message: 'Logout successful'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Logout failed' });
   }
 });
 
