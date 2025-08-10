@@ -217,6 +217,16 @@ class S3Service {
       'application/x-python', 'application/x-java-source', 'application/x-csrc'
     ];
     
+    // Special handling for PDFs and documents - they're not text but can be viewed
+    const viewableExtensions = [
+      '.pdf', '.doc', '.docx', '.rtf'
+    ];
+    
+    const extension = key.toLowerCase().substring(key.lastIndexOf('.'));
+    if (viewableExtensions.includes(extension)) {
+      return false; // These are not text files but are viewable
+    }
+    
     // Check MIME type first
     if (contentType) {
       for (const mimeType of textMimeTypes) {
@@ -263,7 +273,11 @@ class S3Service {
       '.rb': 'text/x-ruby',
       '.go': 'text/x-go',
       '.rs': 'text/x-rust',
-      '.swift': 'text/x-swift'
+      '.swift': 'text/x-swift',
+      '.pdf': 'application/pdf',
+      '.doc': 'application/msword',
+      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.rtf': 'application/rtf'
     };
     
     return mimeTypes[extension] || 'application/octet-stream';

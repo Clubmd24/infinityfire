@@ -162,7 +162,8 @@ const FileExplorer = () => {
     const viewableExtensions = [
       '.txt', '.md', '.js', '.jsx', '.ts', '.tsx', '.html', '.css', '.scss', '.json',
       '.xml', '.csv', '.log', '.ini', '.conf', '.cfg', '.yml', '.yaml', '.sql',
-      '.py', '.java', '.cpp', '.c', '.h', '.php', '.rb', '.go', '.rs', '.swift'
+      '.py', '.java', '.cpp', '.c', '.h', '.php', '.rb', '.go', '.rs', '.swift',
+      '.pdf', '.doc', '.docx', '.rtf'
     ];
     
     const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
@@ -299,29 +300,14 @@ const FileExplorer = () => {
                   </div>
                 </div>
                                   <div className="flex space-x-2">
-                    {isViewableFile(file.name, file.size) ? (
-                      <button
-                        onClick={() => handleFileView(file.path)}
-                        className="btn-secondary"
-                        title="View file contents"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </button>
-                    ) : (
-                      <button
-                        className="btn-secondary opacity-50 cursor-not-allowed"
-                        title={
-                          !isViewableFile(file.name, 0) 
-                            ? "File type not supported for viewing" 
-                            : "File too large to view (max 5MB)"
-                        }
-                        disabled
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleFileView(file.path)}
+                      className="btn-secondary"
+                      title="View file details and content"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View
+                    </button>
                     <button
                       onClick={() => handleFileDownload(file.path)}
                       className="btn-primary"
@@ -405,25 +391,23 @@ const FileExplorer = () => {
                     </div>
                   </div>
                                   <div className="flex space-x-2">
-                  {isViewableFile(file.name, file.size) && (
                     <button
                       onClick={() => handleFileView(file.path)}
                       className="btn-secondary"
-                      title="View file contents"
+                      title="View file details and content"
                     >
                       <Eye className="w-4 h-4 mr-2" />
                       View
                     </button>
-                  )}
-                  <button
-                    onClick={() => handleFileDownload(file.path)}
-                    className="btn-primary"
-                    title="Download file"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </button>
-                </div>
+                    <button
+                      onClick={() => handleFileDownload(file.path)}
+                      className="btn-primary"
+                      title="Download file"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -494,8 +478,15 @@ const FileExplorer = () => {
                       <div className="text-center py-8">
                         <div className="text-gray-400 mb-4">
                           <File className="w-16 h-16 mx-auto mb-4" />
-                          <p className="text-lg">Binary File</p>
-                          <p className="text-sm">This file cannot be displayed as text</p>
+                          <p className="text-lg">
+                            {fileContent.contentType === 'application/pdf' ? 'PDF Document' : 'Document File'}
+                          </p>
+                          <p className="text-sm">
+                            {fileContent.contentType === 'application/pdf' 
+                              ? 'This PDF file cannot be displayed in the browser. Please download to view.'
+                              : 'This document file cannot be displayed as text. Please download to view.'
+                            }
+                          </p>
                         </div>
                         <button
                           onClick={() => handleFileDownload(fileContent.path)}
