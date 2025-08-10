@@ -17,16 +17,20 @@ const Test = () => {
   const [activeTab, setActiveTab] = useState('test1');
   const [testData, setTestData] = useState({
     test1: {
-      input1: '',
-      input2: '',
-      input3: '',
-      dropdownValue: 'option1'
+      fullName: '',
+      date: '',
+      time: '',
+      location: '',
+      testMethod: 'call_point',
+      outcome: 'pass'
     },
     test2: {
-      input1: '',
-      input2: '',
-      input3: '',
-      dropdownValue: 'option1'
+      fullName: '',
+      date: '',
+      time: '',
+      location: '',
+      testMethod: 'weekly_flash',
+      outcome: 'pass'
     },
     fire_drill: {
       drillLeaderName: '',
@@ -51,18 +55,26 @@ const Test = () => {
 
   // Default options for dropdowns based on tabs
   const defaultOptions = {
-    test1: [
-      { value: 'option1', label: 'Option 1 - Basic Test' },
-      { value: 'option2', label: 'Option 2 - Advanced Test' },
-      { value: 'option3', label: 'Option 3 - Custom Test' },
-      { value: 'option4', label: 'Option 4 - Extended Test' }
-    ],
-    test2: [
-      { value: 'option1', label: 'Option 1 - Standard Test' },
-      { value: 'option2', label: 'Option 2 - Performance Test' },
-      { value: 'option3', label: 'Option 3 - Security Test' },
-      { value: 'option4', label: 'Option 4 - Integration Test' }
-    ],
+    test1: {
+      testMethod: [
+        { value: 'call_point', label: 'Call Point' },
+        { value: 'detector', label: 'Detector' }
+      ],
+      outcome: [
+        { value: 'pass', label: 'Pass' },
+        { value: 'fail', label: 'Fail' }
+      ]
+    },
+    test2: {
+      testMethod: [
+        { value: 'weekly_flash', label: 'Weekly Flash Test' },
+        { value: 'monthly_1hr', label: 'Monthly 1hr Test' }
+      ],
+      outcome: [
+        { value: 'pass', label: 'Pass' },
+        { value: 'fail', label: 'Fail' }
+      ]
+    },
     fire_drill: {
       testMethod: [
         { value: 'planned', label: 'Planned' },
@@ -112,6 +124,18 @@ const Test = () => {
           setLoading(false);
           return;
         }
+      } else if (testType === 'test1') {
+        if (!currentTestData.fullName || !currentTestData.date || !currentTestData.time || !currentTestData.location) {
+          setMessage({ type: 'error', text: 'Please fill in all required fields for fire test' });
+          setLoading(false);
+          return;
+        }
+      } else if (testType === 'test2') {
+        if (!currentTestData.fullName || !currentTestData.date || !currentTestData.time || !currentTestData.location) {
+          setMessage({ type: 'error', text: 'Please fill in all required fields for EM light test' });
+          setLoading(false);
+          return;
+        }
       } else {
         if (!currentTestData.input1 || !currentTestData.input2 || !currentTestData.input3) {
           setMessage({ type: 'error', text: 'Please fill in all required fields' });
@@ -139,6 +163,20 @@ const Test = () => {
           involvedPersons: '',
           outcome: 'pass',
           drillReport: ''
+        } : testType === 'test1' ? {
+          fullName: '',
+          date: '',
+          time: '',
+          location: '',
+          testMethod: 'call_point',
+          outcome: 'pass'
+        } : testType === 'test2' ? {
+          fullName: '',
+          date: '',
+          time: '',
+          location: '',
+          testMethod: 'weekly_flash',
+          outcome: 'pass'
         } : {
           input1: '',
           input2: '',
@@ -207,13 +245,13 @@ const Test = () => {
         </div>
         <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-4">
           <div className="text-center">
-            <p className="text-gray-400 text-sm font-medium">Test 1</p>
+            <p className="text-gray-400 text-sm font-medium">Fire Test</p>
             <p className="text-2xl font-bold text-blue-400">{stats.test1Count}</p>
           </div>
         </div>
         <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-4">
           <div className="text-center">
-            <p className="text-gray-400 text-sm font-medium">Test 2</p>
+            <p className="text-gray-400 text-sm font-medium">EM Light Test</p>
             <p className="text-2xl font-bold text-purple-400">{stats.test2Count}</p>
           </div>
         </div>
@@ -248,7 +286,7 @@ const Test = () => {
                 : 'text-gray-400 hover:text-white hover:bg-dark-700'
             }`}
           >
-            Test 1
+            Fire Test
           </button>
           <button
             onClick={() => setActiveTab('test2')}
@@ -258,7 +296,7 @@ const Test = () => {
                 : 'text-gray-400 hover:text-white hover:bg-dark-700'
             }`}
           >
-            Test 2
+            EM Light Test
           </button>
           <button
             onClick={() => setActiveTab('fire_drill')}
@@ -378,6 +416,186 @@ const Test = () => {
                 />
               </div>
             </>
+          ) : activeTab === 'test1' ? (
+            // Test 1 Form (Conduct fire test)
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={testData.test1.fullName}
+                    onChange={(e) => handleInputChange('test1', 'fullName', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={testData.test1.date}
+                    onChange={(e) => handleInputChange('test1', 'date', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Time *
+                  </label>
+                  <input
+                    type="time"
+                    value={testData.test1.time}
+                    onChange={(e) => handleInputChange('test1', 'time', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Location *
+                  </label>
+                  <input
+                    type="text"
+                    value={testData.test1.location}
+                    onChange={(e) => handleInputChange('test1', 'location', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter location"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Test Method *
+                  </label>
+                  <select
+                    value={testData.test1.testMethod}
+                    onChange={(e) => handleInputChange('test1', 'testMethod', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {defaultOptions.test1.testMethod.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Outcome *
+                  </label>
+                  <select
+                    value={testData.test1.outcome}
+                    onChange={(e) => handleInputChange('test1', 'outcome', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {defaultOptions.test1.outcome.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          ) : activeTab === 'test2' ? (
+            // Test 2 Form (EM light test)
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={testData.test2.fullName}
+                    onChange={(e) => handleInputChange('test2', 'fullName', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Enter full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={testData.test2.date}
+                    onChange={(e) => handleInputChange('test2', 'date', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Time *
+                  </label>
+                  <input
+                    type="time"
+                    value={testData.test2.time}
+                    onChange={(e) => handleInputChange('test2', 'time', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Location *
+                  </label>
+                  <input
+                    type="text"
+                    value={testData.test2.location}
+                    onChange={(e) => handleInputChange('test2', 'location', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Enter location"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Test Method *
+                  </label>
+                  <select
+                    value={testData.test2.testMethod}
+                    onChange={(e) => handleInputChange('test2', 'testMethod', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    {defaultOptions.test2.testMethod.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Outcome *
+                  </label>
+                  <select
+                    value={testData.test2.outcome}
+                    onChange={(e) => handleInputChange('test2', 'outcome', e.target.value)}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    {defaultOptions.test2.outcome.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
           ) : (
             // Standard Test Form
             <>
@@ -488,10 +706,10 @@ const Test = () => {
         <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <History className="w-5 h-5 text-blue-400" />
-            Test 1 History
+            Fire Test History
           </h3>
           <p className="text-gray-400 mb-4">
-            View detailed history and results for Test 1
+            View detailed history and results for Fire Tests
           </p>
           <button
             onClick={() => window.location.href = '/tests/history/test1'}
@@ -504,10 +722,10 @@ const Test = () => {
         <div className="bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5 text-purple-400" />
-            Test 2 History
+            EM Light Test History
           </h3>
           <p className="text-gray-400 mb-4">
-            View detailed history and results for Test 2
+            View detailed history and results for EM Light Tests
           </p>
           <button
             onClick={() => window.location.href = '/tests/history/test2'}
