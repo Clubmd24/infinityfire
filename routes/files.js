@@ -87,6 +87,55 @@ router.get('/details', auth, [
   }
 });
 
+// View file contents
+router.get('/view', auth, [
+  query('path')
+    .notEmpty()
+    .withMessage('File path is required')
+], validate, async (req, res) => {
+  try {
+    const { path } = req.query;
+    
+    // Check if file exists
+    const exists = await s3Service.objectExists(path);
+    if (!exists) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+    
+    // Get file details for logging
+    const fileDetails = await s3Service.getFileDetails(path);
+    
+    // Read file contents
+    const fileContents = await s3Service.readFileContents(path);
+    
+    // Log file view activity
+    await logFileActivity(req.user.id, 'file_view', `User viewed file: ${path}`, req, {
+      filePath: path,
+      fileSize: fileDetails.size,
+      contentType: fileDetails.contentType,
+      action: 'view'
+    });
+    
+    res.json({
+      success: true,
+      data: {
+        name: fileDetails.name,
+        path: path,
+        content: fileContents.content,
+        contentType: fileContents.contentType,
+        size: fileContents.size,
+        lastModified: fileContents.lastModified
+      }
+    });
+  } catch (error) {
+    console.error('View file error:', error);
+    res.status(500).json({ 
+      error: 'Failed to view file',
+      message: error.message 
+    });
+  }
+});
+
 // Generate download URL
 router.get('/download', auth, [
   query('path')

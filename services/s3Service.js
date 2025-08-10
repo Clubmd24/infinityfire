@@ -159,6 +159,116 @@ class S3Service {
     }
   }
 
+  // Read file contents
+  async readFileContents(key) {
+    try {
+      const params = {
+        Bucket: bucketName,
+        Key: key
+      };
+
+      const data = await s3.getObject(params).promise();
+      
+      // Determine content type and encoding
+      let content = '';
+      const contentType = data.ContentType || this.getContentTypeFromKey(key);
+      
+      if (this.isTextFile(contentType, key)) {
+        // For text files, try to detect encoding and convert to string
+        try {
+          content = data.Body.toString('utf-8');
+        } catch (encodingError) {
+          // Fallback to other encodings if UTF-8 fails
+          try {
+            content = data.Body.toString('latin1');
+          } catch (fallbackError) {
+            content = data.Body.toString('base64');
+          }
+        }
+      } else {
+        // For binary files, return base64 encoded content
+        content = data.Body.toString('base64');
+      }
+      
+      return {
+        content,
+        contentType,
+        size: data.ContentLength,
+        lastModified: data.LastModified,
+        isBinary: !this.isTextFile(contentType, key)
+      };
+    } catch (error) {
+      console.error('S3 read file contents error:', error);
+      throw new Error('Failed to read file contents');
+    }
+  }
+
+  // Helper method to determine if file is text-based
+  isTextFile(contentType, key) {
+    const textExtensions = [
+      '.txt', '.md', '.js', '.jsx', '.ts', '.tsx', '.html', '.css', '.scss', '.json',
+      '.xml', '.csv', '.log', '.ini', '.conf', '.cfg', '.yml', '.yaml', '.sql',
+      '.py', '.java', '.cpp', '.c', '.h', '.php', '.rb', '.go', '.rs', '.swift',
+      '.sh', '.bash', '.zsh', '.fish', '.bat', '.cmd', '.ps1'
+    ];
+    
+    const textMimeTypes = [
+      'text/', 'application/json', 'application/xml', 'application/javascript',
+      'application/x-python', 'application/x-java-source', 'application/x-csrc'
+    ];
+    
+    // Check MIME type first
+    if (contentType) {
+      for (const mimeType of textMimeTypes) {
+        if (contentType.startsWith(mimeType)) {
+          return true;
+        }
+      }
+    }
+    
+    // Fallback to file extension
+    const extension = key.toLowerCase().substring(key.lastIndexOf('.'));
+    return textExtensions.includes(extension);
+  }
+
+  // Helper method to get content type from file extension
+  getContentTypeFromKey(key) {
+    const extension = key.toLowerCase().substring(key.lastIndexOf('.'));
+    const mimeTypes = {
+      '.txt': 'text/plain',
+      '.md': 'text/markdown',
+      '.js': 'application/javascript',
+      '.jsx': 'application/javascript',
+      '.ts': 'application/typescript',
+      '.tsx': 'application/typescript',
+      '.html': 'text/html',
+      '.css': 'text/css',
+      '.scss': 'text/x-scss',
+      '.json': 'application/json',
+      '.xml': 'application/xml',
+      '.csv': 'text/csv',
+      '.log': 'text/plain',
+      '.ini': 'text/plain',
+      '.conf': 'text/plain',
+      '.cfg': 'text/plain',
+      '.yml': 'text/yaml',
+      '.yaml': 'text/yaml',
+      '.sql': 'application/sql',
+      '.py': 'text/x-python',
+      '.java': 'text/x-java-source',
+      '.cpp': 'text/x-c++src',
+      '.c': 'text/x-csrc',
+      '.h': 'text/x-chdr',
+      '.php': 'application/x-php',
+      '.rb': 'text/x-ruby',
+      '.go': 'text/x-go',
+      '.rs': 'text/x-rust',
+      '.swift': 'text/x-swift'
+    };
+    
+    return mimeTypes[extension] || 'application/octet-stream';
+  }
+
   // Search files by name pattern
   async searchFiles(searchTerm, prefix = '') {
     try {

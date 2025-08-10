@@ -10,7 +10,9 @@ import {
   Home,
   MoreVertical,
   Clock,
-  HardDrive
+  HardDrive,
+  Eye,
+  X
 } from 'lucide-react';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
@@ -24,6 +26,9 @@ const FileExplorer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [viewingFile, setViewingFile] = useState(null);
+  const [fileContent, setFileContent] = useState(null);
+  const [viewingLoading, setViewingLoading] = useState(false);
 
   // Load files and folders for current path
   useEffect(() => {
@@ -92,6 +97,29 @@ const FileExplorer = () => {
     }
   };
 
+  const handleFileView = async (filePath) => {
+    try {
+      setViewingLoading(true);
+      setViewingFile(filePath);
+      
+      const response = await axios.get(`/api/files/view?path=${filePath}`);
+      const { data } = response.data;
+      
+      setFileContent(data);
+    } catch (error) {
+      console.error('View file failed:', error);
+      alert('Failed to view file. Please try again.');
+      setViewingFile(null);
+    } finally {
+      setViewingLoading(false);
+    }
+  };
+
+  const closeFileView = () => {
+    setViewingFile(null);
+    setFileContent(null);
+  };
+
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
     
@@ -128,6 +156,23 @@ const FileExplorer = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const isViewableFile = (fileName, fileSize = 0) => {
+    const viewableExtensions = [
+      '.txt', '.md', '.js', '.jsx', '.ts', '.tsx', '.html', '.css', '.scss', '.json',
+      '.xml', '.csv', '.log', '.ini', '.conf', '.cfg', '.yml', '.yaml', '.sql',
+      '.py', '.java', '.cpp', '.c', '.h', '.php', '.rb', '.go', '.rs', '.swift'
+    ];
+    
+    const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+    const hasViewableExtension = viewableExtensions.includes(extension);
+    
+    // Don't allow viewing files larger than 5MB
+    const maxViewableSize = 5 * 1024 * 1024; // 5MB
+    const isSizeViewable = fileSize <= maxViewableSize;
+    
+    return hasViewableExtension && isSizeViewable;
   };
 
   if (loading) {
@@ -253,13 +298,39 @@ const FileExplorer = () => {
                     <p className="text-sm text-gray-400">{file.path}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleFileDownload(file.path)}
-                  className="btn-primary"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </button>
+                                  <div className="flex space-x-2">
+                    {isViewableFile(file.name, file.size) ? (
+                      <button
+                        onClick={() => handleFileView(file.path)}
+                        className="btn-secondary"
+                        title="View file contents"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </button>
+                    ) : (
+                      <button
+                        className="btn-secondary opacity-50 cursor-not-allowed"
+                        title={
+                          !isViewableFile(file.name, 0) 
+                            ? "File type not supported for viewing" 
+                            : "File too large to view (max 5MB)"
+                        }
+                        disabled
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleFileDownload(file.path)}
+                      className="btn-primary"
+                      title="Download file"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </button>
+                  </div>
               </div>
             ))}
           </div>
@@ -333,17 +404,121 @@ const FileExplorer = () => {
                       </div>
                     </div>
                   </div>
+                                  <div className="flex space-x-2">
+                  {isViewableFile(file.name, file.size) && (
+                    <button
+                      onClick={() => handleFileView(file.path)}
+                      className="btn-secondary"
+                      title="View file contents"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View
+                    </button>
+                  )}
                   <button
                     onClick={() => handleFileDownload(file.path)}
                     className="btn-primary"
+                    title="Download file"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </button>
                 </div>
+                </div>
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* File View Modal */}
+      {viewingFile && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-900 border border-dark-700 rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-dark-700">
+              <div className="flex items-center space-x-3">
+                <File className="w-5 h-5 text-blue-400" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-100">
+                    {fileContent?.name || 'Viewing File'}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {fileContent?.path}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={closeFileView}
+                className="text-gray-400 hover:text-gray-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-hidden">
+              {viewingLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <LoadingSpinner size="lg" />
+                </div>
+              ) : fileContent ? (
+                <div className="p-4 h-full overflow-auto">
+                  {/* File Info */}
+                  <div className="flex items-center justify-between mb-4 p-3 bg-dark-800 rounded-lg">
+                    <div className="flex items-center space-x-4 text-sm text-gray-400">
+                      <span className="flex items-center space-x-1">
+                        <HardDrive className="w-4 h-4" />
+                        <span>{formatFileSize(fileContent.size)}</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{formatDate(fileContent.lastModified)}</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <span>Type: {fileContent.contentType || 'Unknown'}</span>
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleFileDownload(fileContent.path)}
+                      className="btn-primary"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </button>
+                  </div>
+
+                  {/* File Content */}
+                  <div className="bg-dark-800 rounded-lg p-4">
+                    {fileContent.isBinary ? (
+                      <div className="text-center py-8">
+                        <div className="text-gray-400 mb-4">
+                          <File className="w-16 h-16 mx-auto mb-4" />
+                          <p className="text-lg">Binary File</p>
+                          <p className="text-sm">This file cannot be displayed as text</p>
+                        </div>
+                        <button
+                          onClick={() => handleFileDownload(fileContent.path)}
+                          className="btn-primary"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download to View
+                        </button>
+                      </div>
+                    ) : (
+                      <pre className="text-gray-100 text-sm whitespace-pre-wrap break-words font-mono max-h-96 overflow-auto">
+                        {fileContent.content}
+                      </pre>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-gray-400">Failed to load file content</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

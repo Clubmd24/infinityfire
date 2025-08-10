@@ -11,7 +11,9 @@ A modern, secure file access and management website that allows users to browse,
 - 🎨 **Modern UI** - Beautiful dark theme with smooth animations
 - 📱 **Responsive Design** - Works perfectly on desktop and mobile
 - 🔍 **Advanced Search** - Search files by name, type, and content
+- 👁️ **File Viewing** - View file contents directly in the browser without downloading
 - 📊 **Admin Panel** - User management and system monitoring
+- 📝 **Activity Logging** - Comprehensive audit trail for all file operations
 - 🚀 **Performance** - Optimized for speed with lazy loading
 
 ## 🏗️ Architecture
