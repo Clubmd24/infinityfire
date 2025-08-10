@@ -237,7 +237,6 @@ class S3Service {
     }
     
     // Fallback to file extension
-    const extension = key.toLowerCase().substring(key.lastIndexOf('.'));
     return textExtensions.includes(extension);
   }
 
