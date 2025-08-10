@@ -781,8 +781,7 @@ const AdminPanel = () => {
                 </div>
               )}
             </div>
-          </div>
-        </div>
+      )}        </div>
       )}
     </div>
   );

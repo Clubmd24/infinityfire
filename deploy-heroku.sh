@@ -50,6 +50,7 @@ heroku config:set JWT_SECRET="$JWT_SECRET" --app "$APP_NAME"
 heroku config:set JWT_REFRESH_SECRET="$JWT_REFRESH_SECRET" --app "$APP_NAME"
 heroku config:set NODE_ENV=production --app "$APP_NAME"
 heroku config:set PORT=5000 --app "$APP_NAME"
+heroku config:set APP_URL="https://$APP_NAME.herokuapp.com" --app "$APP_NAME"
 
 echo ""
 echo "⚠️  IMPORTANT: You need to set your AWS S3 credentials manually:"

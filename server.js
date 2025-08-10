@@ -34,7 +34,11 @@ app.use('/api/', limiter);
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://infinityfire-app-46b598872702.herokuapp.com'] 
+    ? [
+        'https://infinityfire-app-46b598872702.herokuapp.com',
+        'https://infinityfire.herokuapp.com',
+        process.env.APP_URL || 'https://infinityfire.herokuapp.com'
+      ].filter(Boolean)
     : ['http://localhost:3000'],
   credentials: true
 }));
@@ -80,8 +84,8 @@ async function startServer() {
     await sequelize.authenticate();
     console.log('Database connection established successfully.');
     
-    // Sync database models (in development)
-    if (process.env.NODE_ENV === 'development') {
+    // Sync database models (in development or when explicitly requested)
+    if (process.env.NODE_ENV === 'development' || process.env.SYNC_DATABASE === 'true') {
       await sequelize.sync({ alter: true });
       console.log('Database models synchronized.');
     }

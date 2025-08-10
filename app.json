@@ -38,6 +38,9 @@
     "PORT": {
       "description": "Port for the application to run on",
       "value": "5000"
+    },
+    "APP_URL": {
+      "description": "Your Heroku app URL (e.g., https://your-app-name.herokuapp.com)"
     }
   },
   "formation": {
@@ -50,10 +53,6 @@
     {
       "plan": "heroku-postgresql:mini",
       "as": "DATABASE"
-    },
-    {
-      "plan": "heroku-redis:mini",
-      "as": "REDIS"
     }
   ],
   "buildpacks": [
