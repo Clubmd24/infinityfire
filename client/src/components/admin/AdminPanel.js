@@ -49,9 +49,9 @@ const AdminPanel = () => {
         activeUsers: usersData.filter(u => u.isActive).length,
         bucketStatus: bucketResponse.data.data,
         systemInfo: {
-          nodeVersion: process.version,
-          platform: process.platform,
-          uptime: process.uptime()
+          nodeVersion: 'Browser Environment',
+          platform: navigator.platform || 'Unknown',
+          uptime: Date.now()
         }
       });
     } catch (error) {
@@ -113,7 +113,11 @@ const AdminPanel = () => {
     setMessage({ type: '', text: '' });
   };
 
-  const formatUptime = (seconds) => {
+  const formatUptime = (timestamp) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const seconds = Math.floor(diff / 1000);
+    
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -416,17 +420,17 @@ const AdminPanel = () => {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-gray-400">Environment</p>
-                  <p className="text-white font-medium capitalize">{process.env.NODE_ENV || 'development'}</p>
+                  <p className="text-white font-medium capitalize">Production</p>
                 </div>
                 
                 <div>
                   <p className="text-sm text-gray-400">Port</p>
-                  <p className="text-white font-medium">{process.env.PORT || 5000}</p>
+                  <p className="text-white font-medium">443 (HTTPS)</p>
                 </div>
                 
                 <div>
                   <p className="text-sm text-gray-400">Database</p>
-                  <p className="text-white font-medium">PostgreSQL</p>
+                  <p className="text-white font-medium">MySQL</p>
                 </div>
               </div>
             </div>
