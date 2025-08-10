@@ -25,15 +25,7 @@ const Layout = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-dark-950">
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={closeSidebar}
-        />
-      )}
-
+    <div className="min-h-screen bg-dark-950 flex">
       {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
@@ -42,7 +34,7 @@ const Layout = () => {
       />
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <Header
           user={user}
@@ -50,12 +42,20 @@ const Layout = () => {
         />
 
         {/* Page content */}
-        <main className="p-6">
-          <div className="animate-fade-in">
+        <main className="flex-1 p-6 overflow-auto">
+          <div className="animate-fade-in max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>
       </div>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={closeSidebar}
+        />
+      )}
 
       {/* Mobile menu button */}
       <button

@@ -46,6 +46,12 @@ class S3Service {
           if (object.Key === prefix) return;
           
           const fileName = object.Key.split('/').pop();
+          
+          // Skip macOS system files and other hidden files
+          if (fileName === '.DS_Store' || fileName.startsWith('.') || fileName === 'Thumbs.db') {
+            return;
+          }
+          
           files.push({
             name: fileName,
             path: object.Key,
@@ -167,8 +173,14 @@ class S3Service {
 
       const searchResults = data.Contents
         .filter(object => {
-          const fileName = object.Key.split('/').pop().toLowerCase();
-          return fileName.includes(searchTerm.toLowerCase());
+          const fileName = object.Key.split('/').pop();
+          
+          // Skip macOS system files and other hidden files
+          if (fileName === '.DS_Store' || fileName.startsWith('.') || fileName === 'Thumbs.db') {
+            return false;
+          }
+          
+          return fileName.toLowerCase().includes(searchTerm.toLowerCase());
         })
         .map(object => ({
           name: object.Key.split('/').pop(),
