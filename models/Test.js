@@ -16,7 +16,7 @@ const Test = sequelize.define('Test', {
     }
   },
   testType: {
-    type: DataTypes.ENUM('test1', 'test2'),
+    type: DataTypes.ENUM('test1', 'test2', 'fire_drill'),
     allowNull: false
   },
   testData: {

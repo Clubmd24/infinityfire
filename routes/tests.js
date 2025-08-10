@@ -37,7 +37,7 @@ router.get('/history/:testType', auth, async (req, res) => {
   try {
     const { testType } = req.params;
     
-    if (!['test1', 'test2'].includes(testType)) {
+    if (!['test1', 'test2', 'fire_drill'].includes(testType)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid test type'
@@ -77,10 +77,10 @@ router.post('/create', auth, async (req, res) => {
   try {
     const { testType, testData, notes } = req.body;
 
-    if (!testType || !['test1', 'test2'].includes(testType)) {
+    if (!testType || !['test1', 'test2', 'fire_drill'].includes(testType)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid test type. Must be test1 or test2'
+        message: 'Invalid test type. Must be test1, test2, or fire_drill'
       });
     }
 
@@ -190,6 +190,13 @@ router.get('/stats', auth, async (req, res) => {
       }
     });
 
+    const fireDrillCount = await Test.count({
+      where: { 
+        userId: req.user.id,
+        testType: 'fire_drill'
+      }
+    });
+
     const completedTests = await Test.count({
       where: { 
         userId: req.user.id,
@@ -209,9 +216,10 @@ router.get('/stats', auth, async (req, res) => {
       data: {
         test1Count,
         test2Count,
+        fireDrillCount,
         completedTests,
         pendingTests,
-        totalTests: test1Count + test2Count
+        totalTests: test1Count + test2Count + fireDrillCount
       }
     });
   } catch (error) {
