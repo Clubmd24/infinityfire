@@ -7,13 +7,8 @@ const User = require('../models/User');
 console.log('🚀 Setting up InfinityFire database...\n');
 
 // Database connection
-const sequelize = new Sequelize(process.env.DATABASE_URL || {
-  username: process.env.DATABASE_USERNAME,
-  password: process.env.DATABASE_PASSWORD,
-  database: 'infinityfire',
-  host: 'localhost',
-  port: 5432,
-  dialect: 'postgres',
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'mysql',
   logging: false
 });
 
@@ -58,7 +53,7 @@ async function setupDatabase() {
     console.error(error.message);
     
     if (error.code === 'ECONNREFUSED') {
-      console.error('\n💡 Make sure PostgreSQL is running and accessible');
+      console.error('\n💡 Make sure MySQL is running and accessible');
       console.error('💡 Check your .env file for correct database credentials');
     }
     

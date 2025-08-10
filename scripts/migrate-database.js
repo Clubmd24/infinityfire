@@ -7,13 +7,8 @@ const User = require('../models/User');
 console.log('🔄 Running database migrations...\n');
 
 // Database connection
-const sequelize = new Sequelize(process.env.DATABASE_URL || {
-  username: process.env.DATABASE_USERNAME,
-  password: process.env.DATABASE_PASSWORD,
-  database: 'infinityfire',
-  host: 'localhost',
-  port: 5432,
-  dialect: 'postgres',
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'mysql',
   logging: false
 });
 
