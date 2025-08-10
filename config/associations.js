@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const ActivityLog = require('../models/ActivityLog');
+const Test = require('../models/Test');
 
 // Define associations
 User.hasMany(ActivityLog, {
@@ -13,4 +14,16 @@ ActivityLog.belongsTo(User, {
   as: 'user'
 });
 
-module.exports = { User, ActivityLog }; 
+// Test associations
+User.hasMany(Test, {
+  foreignKey: 'userId',
+  as: 'tests',
+  onDelete: 'CASCADE'
+});
+
+Test.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
+module.exports = { User, ActivityLog, Test }; 

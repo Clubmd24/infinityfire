@@ -7,6 +7,8 @@ import Dashboard from './components/dashboard/Dashboard';
 import FileExplorer from './components/files/FileExplorer';
 import Profile from './components/profile/Profile';
 import AdminPanel from './components/admin/AdminPanel';
+import Test from './components/tests/Test';
+import TestHistory from './components/tests/TestHistory';
 import Layout from './components/layout/Layout';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 
@@ -80,6 +82,8 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="files" element={<FileExplorer />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="tests" element={<Test />} />
+              <Route path="tests/history/:testType" element={<TestHistory />} />
               <Route path="admin" element={
                 <ProtectedRoute adminOnly>
                   <AdminPanel />

@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth');
 const fileRoutes = require('./routes/files');
 const userRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');
+const testRoutes = require('./routes/tests');
 
 // Import database connection
 const { sequelize } = require('./config/database');
@@ -58,6 +59,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/tests', testRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

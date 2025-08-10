@@ -95,4 +95,20 @@ User.getUserWithActivity = async function(userId, limit = 50) {
   });
 };
 
+// Static method to get user with tests
+User.getUserWithTests = async function(userId, limit = 50) {
+  const Test = require('./Test');
+  return await this.findByPk(userId, {
+    attributes: { exclude: ['password'] },
+    include: [
+      {
+        model: Test,
+        as: 'tests',
+        limit: limit,
+        order: [['createdAt', 'DESC']]
+      }
+    ]
+  });
+};
+
 module.exports = User; 

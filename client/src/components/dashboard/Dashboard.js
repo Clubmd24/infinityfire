@@ -9,7 +9,8 @@ import {
   User, 
   Activity,
   ArrowRight,
-  HardDrive
+  HardDrive,
+  Play
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -242,6 +243,20 @@ const Dashboard = () => {
                 </div>
               </div>
               <ArrowRight className="w-5 h-5 text-green-400 group-hover:translate-x-1 transition-transform" />
+            </Link>
+
+            <Link
+              to="/tests"
+              className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg hover:from-purple-500/30 hover:to-pink-500/30 transition-all duration-200 group"
+            >
+              <div className="flex items-center gap-3">
+                <Play className="w-6 h-6 text-purple-400" />
+                <div>
+                  <p className="text-white font-medium">Conduct Tests</p>
+                  <p className="text-gray-400 text-sm">Run diagnostic tests</p>
+                </div>
+              </div>
+              <ArrowRight className="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform" />
             </Link>
 
             {user.role === 'admin' && (

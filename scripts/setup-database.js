@@ -3,6 +3,7 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 const User = require('../models/User');
+const Test = require('../models/Test');
 
 console.log('🚀 Setting up InfinityFire database...\n');
 

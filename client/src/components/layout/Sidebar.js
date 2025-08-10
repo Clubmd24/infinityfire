@@ -9,7 +9,8 @@ import {
   Users,
   LogOut,
   X,
-  Shield
+  Shield,
+  Play
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose, user }) => {
@@ -33,6 +34,12 @@ const Sidebar = ({ isOpen, onClose, user }) => {
       href: '/files',
       icon: FolderOpen,
       description: 'Browse and download files'
+    },
+    {
+      name: 'Tests',
+      href: '/tests',
+      icon: Play,
+      description: 'Conduct diagnostic tests'
     },
     {
       name: 'Profile',
