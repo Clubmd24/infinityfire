@@ -105,7 +105,35 @@ router.get('/view', auth, [
     // Get file details for logging
     const fileDetails = await s3Service.getFileDetails(path);
     
-    // Read file contents
+    // Check if this is a binary file that shouldn't display content
+    const isBinary = !s3Service.isTextFile(fileDetails.contentType, path);
+    
+    // For binary files, only return metadata
+    if (isBinary) {
+      // Log file view activity
+      await logFileActivity(req.user.id, 'file_view', `User viewed file: ${path}`, req, {
+        filePath: path,
+        fileSize: fileDetails.size,
+        contentType: fileDetails.contentType,
+        action: 'view'
+      });
+      
+      res.json({
+        success: true,
+        data: {
+          name: fileDetails.name,
+          path: path,
+          content: null,
+          contentType: fileDetails.contentType,
+          size: fileDetails.size,
+          lastModified: fileDetails.lastModified,
+          isBinary: true
+        }
+      });
+      return;
+    }
+    
+    // For text files, read and return content
     const fileContents = await s3Service.readFileContents(path);
     
     // Log file view activity
@@ -124,7 +152,8 @@ router.get('/view', auth, [
         content: fileContents.content,
         contentType: fileContents.contentType,
         size: fileContents.size,
-        lastModified: fileContents.lastModified
+        lastModified: fileContents.lastModified,
+        isBinary: false
       }
     });
   } catch (error) {
