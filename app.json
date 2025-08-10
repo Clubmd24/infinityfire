@@ -1,0 +1,67 @@
+{
+  "name": "InfinityFire",
+  "description": "Secure file access and download platform with S3 integration",
+  "repository": "https://github.com/Clubmd24/infinityfire",
+  "logo": "https://raw.githubusercontent.com/Clubmd24/infinityfire/main/client/src/assets/logo.png",
+  "keywords": ["node", "express", "react", "s3", "file-management", "postgresql"],
+  "website": "https://infinityfire.herokuapp.com",
+  "success_url": "/",
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment setting",
+      "value": "production"
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token generation",
+      "generator": "secret"
+    },
+    "JWT_REFRESH_SECRET": {
+      "description": "Secret key for JWT refresh tokens",
+      "generator": "secret"
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL database connection string"
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "description": "AWS S3 access key ID"
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "AWS S3 secret access key"
+    },
+    "AWS_REGION": {
+      "description": "AWS region for S3 bucket",
+      "value": "us-east-1"
+    },
+    "AWS_S3_BUCKET": {
+      "description": "S3 bucket name for file storage"
+    },
+    "PORT": {
+      "description": "Port for the application to run on",
+      "value": "5000"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini",
+      "as": "DATABASE"
+    },
+    {
+      "plan": "heroku-redis:mini",
+      "as": "REDIS"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "scripts": {
+    "postdeploy": "npm run db:setup"
+  }
+} 
