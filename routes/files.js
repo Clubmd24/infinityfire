@@ -4,6 +4,15 @@ const { auth } = require('../middleware/auth');
 const s3Service = require('../services/s3Service');
 const ActivityLog = require('../models/ActivityLog');
 
+// Validation middleware
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
+
 // Helper function to log file activity
 const logFileActivity = async (userId, activityType, description, req, metadata = {}) => {
   try {
@@ -33,12 +42,8 @@ router.get('/list', auth, [
     .optional()
     .isString()
     .withMessage('Path must be a string')
-], async (req, res) => {
+], validate, async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
     const { path = '' } = req.query;
     
@@ -62,12 +67,8 @@ router.get('/details', auth, [
   query('path')
     .notEmpty()
     .withMessage('File path is required')
-], async (req, res) => {
+], validate, async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
     const { path } = req.query;
     
@@ -95,12 +96,8 @@ router.get('/download', auth, [
     .optional()
     .isInt({ min: 300, max: 86400 })
     .withMessage('Expires must be between 300 and 86400 seconds')
-], async (req, res) => {
+], validate, async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
     const { path, expires = 3600 } = req.query;
     
@@ -147,12 +144,8 @@ router.get('/search', auth, [
     .optional()
     .isString()
     .withMessage('Path must be a string')
-], async (req, res) => {
+], validate, async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
     const { q: searchTerm, path = '' } = req.query;
     
@@ -200,12 +193,8 @@ router.get('/navigate', auth, [
     .optional()
     .isString()
     .withMessage('Path must be a string')
-], async (req, res) => {
+], validate, async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
     const { path = '' } = req.query;
     

@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const Test = require('../models/Test');
 const User = require('../models/User');
 
 // Get all tests for the authenticated user
-router.get('/my-tests', authenticateToken, async (req, res) => {
+router.get('/my-tests', auth, async (req, res) => {
   try {
     const tests = await Test.findAll({
       where: { userId: req.user.id },
@@ -33,7 +33,7 @@ router.get('/my-tests', authenticateToken, async (req, res) => {
 });
 
 // Get test history by type
-router.get('/history/:testType', authenticateToken, async (req, res) => {
+router.get('/history/:testType', auth, async (req, res) => {
   try {
     const { testType } = req.params;
     
@@ -73,7 +73,7 @@ router.get('/history/:testType', authenticateToken, async (req, res) => {
 });
 
 // Create a new test
-router.post('/create', authenticateToken, async (req, res) => {
+router.post('/create', auth, async (req, res) => {
   try {
     const { testType, testData, notes } = req.body;
 
@@ -125,7 +125,7 @@ router.post('/create', authenticateToken, async (req, res) => {
 });
 
 // Update test status and result
-router.put('/:testId/update', authenticateToken, async (req, res) => {
+router.put('/:testId/update', auth, async (req, res) => {
   try {
     const { testId } = req.params;
     const { status, result, notes } = req.body;
@@ -174,7 +174,7 @@ router.put('/:testId/update', authenticateToken, async (req, res) => {
 });
 
 // Get test statistics for the user
-router.get('/stats', authenticateToken, async (req, res) => {
+router.get('/stats', auth, async (req, res) => {
   try {
     const test1Count = await Test.count({
       where: { 
