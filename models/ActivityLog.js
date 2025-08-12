@@ -16,7 +16,7 @@ const ActivityLog = sequelize.define('ActivityLog', {
     }
   },
   activityType: {
-    type: DataTypes.ENUM('login', 'logout', 'file_download', 'file_upload', 'file_delete', 'file_view'),
+    type: DataTypes.ENUM('login', 'logout', 'file_download', 'file_upload', 'file_delete', 'file_view', 'venue_checklist_created', 'venue_checklist_updated', 'venue_checklist_items_updated', 'venue_checklist_completed', 'venue_checklist_deleted'),
     allowNull: false
   },
   description: {

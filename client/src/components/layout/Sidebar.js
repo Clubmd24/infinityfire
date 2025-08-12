@@ -10,7 +10,8 @@ import {
   LogOut,
   X,
   Shield,
-  Play
+  Play,
+  ClipboardCheck
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose, user }) => {
@@ -40,6 +41,12 @@ const Sidebar = ({ isOpen, onClose, user }) => {
       href: '/tests',
       icon: Play,
       description: 'Conduct diagnostic tests'
+    },
+    {
+      name: 'Venue Checklists',
+      href: '/venue-checklists',
+      icon: ClipboardCheck,
+      description: 'Opening and closing checklists'
     },
     {
       name: 'Profile',

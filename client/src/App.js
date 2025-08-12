@@ -9,6 +9,7 @@ import Profile from './components/profile/Profile';
 import AdminPanel from './components/admin/AdminPanel';
 import Test from './components/tests/Test';
 import TestHistory from './components/tests/TestHistory';
+import VenueChecklists from './components/venue/VenueChecklists';
 import Layout from './components/layout/Layout';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 
@@ -81,6 +82,7 @@ function App() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="files" element={<FileExplorer />} />
+              <Route path="venue-checklists" element={<VenueChecklists />} />
               <Route path="profile" element={<Profile />} />
               <Route path="tests" element={<Test />} />
               <Route path="tests/history/:testType" element={<TestHistory />} />
